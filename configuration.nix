@@ -31,7 +31,7 @@
       "1.1.1.1"
       "8.8.8.8"
     ];
-    firewall.enable = true;
+    # firewall.enable = true;
   };
 
   time.timeZone = "UTC";
@@ -39,7 +39,7 @@
 
   users.users.q = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" "input" ];
+    extraGroups = [ "wheel" "networkmanager" "input" "libvirtd" ]; # Added libvirtd for KVM management
     initialPassword = "a";
     shell = pkgs.zsh;
   };
@@ -76,6 +76,8 @@
     slurp
 
     rustdesk-flutter
+
+    virt-manager # Added for QEMU/KVM GUI management
   ];
 
   environment.sessionVariables = {
@@ -133,8 +135,18 @@
 
   zramSwap = {
     enable = true;
-    memoryPercent = 25; # Use 50% of RAM for zram swap
+    memoryPercent = 50; # Use 50% of RAM for zram swap
     algorithm = "zstd"; # Default, efficient compression
     priority = 100; # Higher priority than disk swap (if any)
   };
+
+  # QEMU/KVM
+  virtualisation.libvirtd = {
+    enable = true;
+    qemu = {
+      package = pkgs.qemu_kvm; # Optimized for KVM (valid package in 25.05)
+    };
+  };
+
+  boot.kernelModules = [ "kvm-intel" ]; # Use "kvm-amd" if you have an AMD CPU
 }
